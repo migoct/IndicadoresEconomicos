@@ -1,30 +1,32 @@
 package com.dissolucion.indicadoreseconomicos.data.repository
 
+import android.util.Log
 import com.dissolucion.indicadoreseconomicos.core.common.Resource
 import com.dissolucion.indicadoreseconomicos.data.api.IndicadoresApi
 import com.dissolucion.indicadoreseconomicos.data.mapper.toDomainIndicadores
 import com.dissolucion.indicadoreseconomicos.doamin.model.todos.Indicadores
 import com.dissolucion.indicadoreseconomicos.doamin.repository.IndicadoresRepository
 import dagger.hilt.android.scopes.ViewModelScoped
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.coroutineScope
 import javax.inject.Inject
 
 @ViewModelScoped
 class IndicadoresRepositoryImpl @Inject constructor(
-    private val api: IndicadoresApi
+    private val apiService: IndicadoresApi
 ) : IndicadoresRepository {
-    override fun getIndicadores(): Flow<Resource<Indicadores>> {
-        return flow {
-            emit(Resource.Loading())
-            val result = api.getIndicadores().toDomainIndicadores()
-            emit(Resource.Success(result))
-        }.flowOn(Dispatchers.IO)
-            .catch {e ->
-                emit(Resource.Error(e.message.toString()))
+
+    override suspend fun getIndicadores(): Resource<Indicadores> {
+        return try {
+            Log.e("Repository", "getIndicadores")
+            coroutineScope {
+                val api = apiService.getIndicadores()
+                Log.e("Repository", "getIndicadores api: $api")
+                val result = api.toDomainIndicadores()
+                Log.e("Repository", "getIndicadores result: $result")
+                Resource.Success(result)
             }
+        } catch (e: Exception) {
+            Resource.Error(message = e.message.toString())
+        }
     }
 }

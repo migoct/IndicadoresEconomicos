@@ -3,7 +3,6 @@ package com.dissolucion.indicadoreseconomicos.presentation.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -17,7 +16,7 @@ fun Navigation() {
     NavHost(navController = navController, startDestination = Screen.IndicadoresScreen.route) {
         composable(Screen.IndicadoresScreen.route) {
             val indicadoresViewModel = hiltViewModel<IndicadoresViewModel>()
-            val indicadoresState = indicadoresViewModel.indicadoresState.collectAsStateWithLifecycle().value
+            val indicadoresState = indicadoresViewModel.indicadoresState.value
 
             IndicadoresScreen(
                 indicadoresState = indicadoresState,

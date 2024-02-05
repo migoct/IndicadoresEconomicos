@@ -4,7 +4,7 @@ import com.dissolucion.indicadoreseconomicos.doamin.repository.IndicadoresReposi
 import javax.inject.Inject
 
 class GetIndicadoresUseCase @Inject constructor(
-    private val repository: IndicadoresRepository)
-{
-    operator fun invoke() = repository.getIndicadores()
+    private val repository: IndicadoresRepository
+) {
+    suspend operator fun invoke() = repository.getIndicadores()
 }

@@ -6,7 +6,7 @@ import retrofit2.http.Headers
 
 interface IndicadoresApi {
 
-    @Headers("Accept: application/json")
+    @Headers("Content-Type: application/json")
     @GET("/")
     suspend fun getIndicadores(): IndicadoresDto
 }

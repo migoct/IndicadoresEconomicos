@@ -1,10 +1,15 @@
 package com.dissolucion.indicadoreseconomicos.di
 
+import android.util.Log
 import com.dissolucion.indicadoreseconomicos.core.utils.Constants.BASE_URL
 import com.dissolucion.indicadoreseconomicos.data.api.IndicadoresApi
 import com.dissolucion.indicadoreseconomicos.data.repository.IndicadoresRepositoryImpl
 import com.dissolucion.indicadoreseconomicos.doamin.repository.IndicadoresRepository
+import com.dissolucion.indicadoreseconomicos.doamin.usecase.GetIndicadoresUseCase
+import com.dissolucion.indicadoreseconomicos.doamin.usecase.UseCases
 import com.google.gson.Gson
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -13,7 +18,7 @@ import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Protocol
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.converter.moshi.MoshiConverterFactory
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
@@ -32,6 +37,13 @@ class AppModule {
         .serializeNulls()
         .setLenient()
         .create()
+
+    @Provides
+    @Singleton
+    fun getMoshi(): Moshi = Moshi
+        .Builder()
+        .add(KotlinJsonAdapterFactory())
+        .build()
 
     @Provides
     @Singleton
@@ -62,24 +74,39 @@ class AppModule {
     fun provideRetrofitInstance(
         okHttpClient: OkHttpClient,
         gson: Gson,
+        moshi: Moshi,
         baseUrl: String
     ): Retrofit {
-        return Retrofit.Builder()
+        val retrofit = Retrofit.Builder()
             .baseUrl(baseUrl)
-            .addConverterFactory(GsonConverterFactory.create(gson))
+            .addConverterFactory(MoshiConverterFactory.create(moshi).asLenient())
             .client(okHttpClient)
             .build()
+        Log.e("Retrofit", "Retrofit instance created")
+        return retrofit
     }
 
     @Provides
     @Singleton
     fun provideIndicadoresApi(retrofit: Retrofit): IndicadoresApi {
-        return retrofit.create(IndicadoresApi::class.java)
+        val result = retrofit.create(IndicadoresApi::class.java)
+        Log.e("Retrofit", "IndicadoresApi instance created")
+        return result
     }
 
     @Provides
     @Singleton
     fun provideIndicadoresRepository(indicadoresApi: IndicadoresApi): IndicadoresRepository {
-        return IndicadoresRepositoryImpl(indicadoresApi)
+        val result = IndicadoresRepositoryImpl(indicadoresApi)
+        Log.e("Retrofit", "IndicadoresRepository instance created")
+        return result
+    }
+
+    @Provides
+    @Singleton
+    fun provideIndicadoresUseCase(repository: IndicadoresRepository): UseCases {
+        return UseCases(
+            GetIndicadoresUseCase(repository)
+        )
     }
 }
